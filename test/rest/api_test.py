@@ -5,9 +5,8 @@ from urllib.request import urlopen
 
 import pytest
 
-# Configuración dinámica desde variables de entorno
-BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")  # URL de tu API Flask
-BASE_URL_MOCK = os.getenv("BASE_URL_MOCK", "http://localhost:8080")  # URL de WireMock
+BASE_URL = "http://localhost:5000"
+BASE_URL_MOCK = "http://localhost:9090"
 DEFAULT_TIMEOUT = 2  # in secs
 
 @pytest.mark.api
