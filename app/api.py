@@ -1,55 +1,56 @@
-import http.client
-
-from flask import Flask
-
+from flask import Flask, jsonify
 from app import util
 from app.calc import Calculator
 
 CALCULATOR = Calculator()
 api_application = Flask(__name__)
-HEADERS = {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"}
-
+HEADERS = {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"}
 
 @api_application.route("/")
 def hello():
     return "Hello from The Calculator!\n"
 
-
 @api_application.route("/calc/add/<op_1>/<op_2>", methods=["GET"])
 def add(op_1, op_2):
     try:
         num_1, num_2 = util.convert_to_number(op_1), util.convert_to_number(op_2)
-        return ({"result": CALCULATOR.add(num_1, num_2)}, http.client.OK, HEADERS)
-
+        result = CALCULATOR.add(num_1, num_2)
+        return jsonify({"result": result}), 200, HEADERS
     except TypeError as e:
-        return (str(e), http.client.BAD_REQUEST, HEADERS)
+        return str(e), 400, HEADERS
 
-
-@api_application.route("/calc/substract/<op_1>/<op_2>", methods=["GET"])
-def substract(op_1, op_2):
+@api_application.route("/calc/subtract/<op_1>/<op_2>", methods=["GET"])
+def subtract(op_1, op_2):
     try:
         num_1, num_2 = util.convert_to_number(op_1), util.convert_to_number(op_2)
-        return ("{}".format(CALCULATOR.substract(num_1, num_2)), http.client.OK, HEADERS)
+        result = CALCULATOR.substract(num_1, num_2)
+        return jsonify({"result": result}), 200, HEADERS
     except TypeError as e:
-        return (str(e), http.client.BAD_REQUEST, HEADERS)
-    
+        return str(e), 400, HEADERS
+
 @api_application.route("/calc/multiply/<op_1>/<op_2>", methods=["GET"])
 def multiply(op_1, op_2):
     try:
         num_1, num_2 = util.convert_to_number(op_1), util.convert_to_number(op_2)
-        return ({"result": CALCULATOR.multiply(num_1, num_2)}, http.client.OK, HEADERS)
+        result = CALCULATOR.multiply(num_1, num_2)
+        return jsonify({"result": result}), 200, HEADERS
     except TypeError as e:
-        return (str(e), http.client.BAD_REQUEST, HEADERS)
-    
+        return str(e), 400, HEADERS
 
 @api_application.route("/calc/divide/<op_1>/<op_2>", methods=["GET"])
 def divide(op_1, op_2):
     try:
         num_1, num_2 = util.convert_to_number(op_1), util.convert_to_number(op_2)
         if num_2 == 0:
-            raise ZeroDivisionError("Division by zero is not allowed.")
-        return ({"result": CALCULATOR.divide(num_1, num_2)}, http.client.OK, HEADERS)
-    except (TypeError, ZeroDivisionError) as e:
-        return (str(e), http.client.BAD_REQUEST, HEADERS)
+            return "Division by zero is not allowed.", 400, HEADERS
+        result = CALCULATOR.divide(num_1, num_2)
+        return jsonify({"result": result}), 200, HEADERS
+    except TypeError as e:
+        return str(e), 400, HEADERS
+
+@api_application.errorhandler(404)
+def not_found(error):
+    return "Resource not found", 404
+
 
 
