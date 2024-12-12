@@ -3,8 +3,9 @@ from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 import http.client
 
-BASE_URL = "http://example.com/api"
-DEFAULT_TIMEOUT = 10
+BASE_URL = "http://localhost:5000"
+BASE_URL_MOCK = "http://localhost:9090"
+DEFAULT_TIMEOUT = 2  # in secs
 
 class TestApi(unittest.TestCase):
 
