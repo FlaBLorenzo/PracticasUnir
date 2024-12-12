@@ -5,7 +5,8 @@ from urllib.request import urlopen, URLError
 import pytest
 
 BASE_URL = "http://localhost:5000"
-DEFAULT_TIMEOUT = 2  # en segundos
+BASE_URL_MOCK = "http://localhost:9090"
+DEFAULT_TIMEOUT = 2  # in secs
 
 @pytest.mark.api
 class TestApi(unittest.TestCase):
