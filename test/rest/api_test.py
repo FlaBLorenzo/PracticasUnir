@@ -3,9 +3,8 @@ from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 import http.client
 
-BASE_URL = "http://localhost:5000"
-BASE_URL_MOCK = "http://localhost:9090"
-DEFAULT_TIMEOUT = 2  # in secs
+BASE_URL = "http://example.com/api"
+DEFAULT_TIMEOUT = 10
 
 class TestApi(unittest.TestCase):
 
@@ -21,7 +20,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual(response.status, http.client.OK, f"Error en la petición API a {url}")
         self.assertEqual(response.read().decode().strip(), '{"result": 5.0}', "ERROR DIVIDE")
 
-   
+
     def test_api_multiply(self):
         url = f"{BASE_URL}/calc/multiply/3/4"
         response = urlopen(url, timeout=DEFAULT_TIMEOUT)
@@ -36,6 +35,7 @@ class TestApi(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
 
 
 
