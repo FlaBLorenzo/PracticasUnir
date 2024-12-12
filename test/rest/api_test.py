@@ -1,6 +1,6 @@
 import unittest
 from urllib.request import urlopen
-from urllib.error import URLError
+from urllib.error import URLError, HTTPError
 import http.client
 
 BASE_URL = "http://localhost:5000"
@@ -25,8 +25,10 @@ class TestApi(unittest.TestCase):
         url = f"{BASE_URL}/calc/divide/10/0"
         try:
             urlopen(url, timeout=DEFAULT_TIMEOUT)
-        except URLError as e:
+        except HTTPError as e:
             self.assertEqual(e.code, 406, "Expected HTTP 406 for division by zero")
+        except URLError as e:
+            self.assertTrue(isinstance(e.reason, ValueError), "Expected HTTP 406 for division by zero")
 
     def test_api_multiply(self):
         url = f"{BASE_URL}/calc/multiply/3/4"
@@ -40,8 +42,9 @@ class TestApi(unittest.TestCase):
         self.assertEqual(response.status, http.client.OK, f"Error en la petición API a {url}")
         self.assertEqual(response.read().decode().strip(), '{"result": 2}', "ERROR SUBTRACT")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
+
 
 
 
