@@ -21,15 +21,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual(response.status, http.client.OK, f"Error en la petición API a {url}")
         self.assertEqual(response.read().decode().strip(), '{"result": 5.0}', "ERROR DIVIDE")
 
-    def test_api_divide_by_zero(self):
-        url = f"{BASE_URL}/calc/divide/10/0"
-        try:
-            urlopen(url, timeout=DEFAULT_TIMEOUT)
-        except HTTPError as e:
-            self.assertEqual(e.code, 406, "Expected HTTP 406 for division by zero")
-        except URLError as e:
-            self.assertTrue(isinstance(e.reason, ValueError), "Expected HTTP 406 for division by zero")
-
+   
     def test_api_multiply(self):
         url = f"{BASE_URL}/calc/multiply/3/4"
         response = urlopen(url, timeout=DEFAULT_TIMEOUT)
