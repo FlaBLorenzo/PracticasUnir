@@ -42,7 +42,7 @@ def divide(op_1, op_2):
     try:
         num_1, num_2 = util.convert_to_number(op_1), util.convert_to_number(op_2)
         if num_2 == 0:
-            return "Division by zero is not allowed.", 400, HEADERS
+            return "Division by zero is not allowed.", 406, HEADERS
         result = CALCULATOR.divide(num_1, num_2)
         return jsonify({"result": result}), 200, HEADERS
     except TypeError as e:
