@@ -1,0 +1,102 @@
+pipeline {
+    agent none
+
+    stages {
+        stage('Get Code') {
+            agent { label 'master' }
+            when {
+                branch 'master'
+            }
+            steps {
+                echo "Executing on agent: ${env.NODE_NAME}"
+                bat '''
+                whoami
+                hostname
+                '''
+                git url: 'https://github.com/FlaBLorenzo/PracticasUnir.git', branch: 'master'
+                stash includes: '**', name: 'source-code'
+            }
+        }
+
+        stage('Build') {
+            agent { label 'master' }
+            steps {
+                echo "Executing on agent: ${env.NODE_NAME}"
+                bat '''
+                whoami
+                hostname
+                '''
+                echo 'Building Python Project'
+                bat "dir"
+            }
+        }
+
+        stage('Test') {
+            parallel {
+                stage('Unit Tests') {
+                    agent { label 'unit-tests' }
+                    when {
+                        branch 'master'
+                    }
+                    steps {
+                        echo "Executing on agent: ${env.NODE_NAME}"
+                        bat '''
+                        whoami
+                        hostname
+                        '''
+                        unstash 'source-code'
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            bat '''
+                            set PYTHONPATH=%WORKSPACE%
+                            pytest --junitxml=result-unit.xml test\\unit
+                            '''
+                        }
+                    }
+                }
+
+                stage('REST API Tests') {
+                    agent { label 'rest-tests' }
+                    when {
+                        branch 'master'
+                    }
+                    steps {
+                        echo "Executing on agent: ${env.NODE_NAME}"
+                        bat '''
+                        whoami
+                        hostname
+                        '''
+                        unstash 'source-code'
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            bat '''
+                            REM Start Flask API
+                            set FLASK_APP=app\\api.py
+                            start flask run
+                            timeout /t 20 > nul
+                            set PYTHONPATH=%WORKSPACE%
+
+                            REM Start WireMock
+                            start java -jar C:\\Users\\flavia.lorenzo\\Desktop\\UNIR\\wiremock-standalone-3.10.0.jar --port 9090 --root-dir C:\\Users\\flavia.lorenzo\\Desktop\\UNIR\\helloworld-master\\test\\wiremock
+                            timeout /t 15 > nul
+
+                            REM Execute REST API Tests
+                            pytest --junitxml=result-rest.xml test\\rest
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Results') {
+            agent { label 'master' }
+            steps {
+                echo "Executing on agent: ${env.NODE_NAME}"
+                bat '''
+                whoami
+                hostname
+                '''
+                junit 'result*.xml'
+            }
+        }
+    }
+}
