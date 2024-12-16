@@ -3,7 +3,7 @@ pipeline {
 
     stages {
         stage('Get Code') {
-            agent { label 'master' }
+            agent { label 'Principal' }
             when {
                 branch 'feature_fix_racecond'
             }
@@ -15,7 +15,7 @@ pipeline {
         }
 
         stage('Build') {
-            agent { label 'master' }
+            agent { label 'Principal' }
             steps {
                 echo "Executing on agent: ${env.NODE_NAME}"
                 echo 'Building Python Project'
