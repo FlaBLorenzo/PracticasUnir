@@ -79,7 +79,7 @@ pipeline {
         }
 
         stage('Results') {
-            agent { label 'master' }
+            agent { label 'Principal' }
             steps {
                 echo "Executing on agent: ${env.NODE_NAME}"
                 bat '''
