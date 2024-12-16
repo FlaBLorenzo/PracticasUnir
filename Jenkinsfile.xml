@@ -1,16 +1,26 @@
 pipeline {
     agent none
+    environment {
+        REPO_URL = 'https://github.com/FlaBLorenzo/PracticasUnir.git'
+        BRANCH_NAME = 'master'
+        FLASK_APP_PATH = 'app/api.py'
+        WIREMOCK_JAR_PATH = 'C:\\Users\\flavia.lorenzo\\Desktop\\UNIR\\wiremock-standalone-3.10.0.jar'
+        WIREMOCK_ROOT_DIR = 'C:\\Users\\flavia.lorenzo\\Desktop\\UNIR\\helloworld-master\\test\\wiremock'
+    }
 
     stages {
         stage('Get Code') {
             agent { label 'Principal' }
             when {
-                branch 'feature_fix_racecond'
+                branch feature_fix_racecond
             }
             steps {
-                checkout scm: [refspec: '+refs/heads/*:refs/remotes/origin/*', force: true, credentialsId: 'tu-credencial-id'] 
                 echo "Executing on agent: ${env.NODE_NAME}"
-                git url: 'https://github.com/FlaBLorenzo/PracticasUnir.git', branch: 'feature_fix_racecond'
+                bat '''
+                whoami
+                hostname
+                '''
+                git url: REPO_URL, branch: feature_fix_racecond
                 stash includes: '**', name: 'source-code'
             }
         }
@@ -19,6 +29,10 @@ pipeline {
             agent { label 'Principal' }
             steps {
                 echo "Executing on agent: ${env.NODE_NAME}"
+                bat '''
+                whoami
+                hostname
+                '''
                 echo 'Building Python Project'
                 bat "dir"
             }
@@ -29,53 +43,56 @@ pipeline {
                 stage('Unit Tests') {
                     agent { label 'unit-tests' }
                     when {
-                        branch 'feature_fix_racecond'
+                        branch feature_fix_racecond
                     }
                     steps {
                         echo "Executing on agent: ${env.NODE_NAME}"
                         unstash 'source-code'
-                        bat '''
-                        set PYTHONPATH=%WORKSPACE%
-                        pytest --junitxml=result-unit.xml test\\unit
-                        '''
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            bat '''
+                            set PYTHONPATH=%WORKSPACE%
+                            pytest --junitxml=result-unit.xml test\\unit
+                            '''
+                        }
                     }
                 }
 
                 stage('REST API Tests') {
                     agent { label 'rest-tests' }
                     when {
-                        branch 'feature_fix_racecond'
+                        branch feature_fix_racecond
                     }
                     steps {
                         echo "Executing on agent: ${env.NODE_NAME}"
                         unstash 'source-code'
-                        bat '''
-                        REM Start Flask API
-                        set FLASK_APP=app\\api.py
-                        start flask run
-                        timeout /t 20 > nul
-                        set PYTHONPATH=%WORKSPACE%
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            bat '''
+                            REM Start Flask API
+                            set FLASK_APP=${FLASK_APP_PATH}
+                            start flask run
+                            timeout /t 20 > nul
 
-                        REM Start WireMock
-                        start java -jar C:\\Users\\flavia.lorenzo\\Desktop\\UNIR\\wiremock-standalone-3.10.0.jar --port 9090 --root-dir C:\\Users\\flavia.lorenzo\\Desktop\\UNIR\\helloworld-master\\test\\wiremock
-                        timeout /t 15 > nul
+                            REM Start WireMock
+                            start java -jar ${WIREMOCK_JAR_PATH} --port 9090 --root-dir ${WIREMOCK_ROOT_DIR}
+                            timeout /t 15 > nul
 
-                        REM Execute REST API Tests
-                        pytest --junitxml=result-rest.xml test\\rest
-                        '''
+                            REM Execute REST API Tests
+                            set PYTHONPATH=%WORKSPACE%
+                            pytest --junitxml=result-rest.xml test\\rest
+                            '''
+                        }
                     }
                 }
             }
         }
 
         stage('Results') {
-            agent { label 'master' }
+            agent { label 'Principal' }
             steps {
                 echo "Executing on agent: ${env.NODE_NAME}"
                 junit 'result*.xml'
             }
         }
     }
-
 }
 
