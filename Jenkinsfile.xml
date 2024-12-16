@@ -8,7 +8,6 @@ pipeline {
                 branch 'feature_fix_racecond'
             }
             steps {
-                cleanWs() 
                 checkout scm: [refspec: '+refs/heads/*:refs/remotes/origin/*', force: true, credentialsId: 'tu-credencial-id'] 
                 echo "Executing on agent: ${env.NODE_NAME}"
                 git url: 'https://github.com/FlaBLorenzo/PracticasUnir.git', branch: 'feature_fix_racecond'
