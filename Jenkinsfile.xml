@@ -8,6 +8,7 @@ pipeline {
                 branch 'feature_fix_racecond'
             }
             steps {
+                checkout scm: [verbose: true] 
                 echo "Executing on agent: ${env.NODE_NAME}"
                 git url: 'https://github.com/FlaBLorenzo/PracticasUnir.git', branch: 'feature_fix_racecond'
                 stash includes: '**', name: 'source-code'
