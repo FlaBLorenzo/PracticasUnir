@@ -12,7 +12,7 @@ pipeline {
         stage('Get Code') {
             agent { label 'Principal' }
             when {
-                branch feature_fix_racecond
+                branch 'feature_fix_racecond'
             }
             steps {
                 echo "Executing on agent: ${env.NODE_NAME}"
@@ -20,7 +20,7 @@ pipeline {
                 whoami
                 hostname
                 '''
-                git url: REPO_URL, branch: feature_fix_racecond
+                git url: REPO_URL, branch: 'feature_fix_racecond'
                 stash includes: '**', name: 'source-code'
             }
         }
@@ -43,7 +43,7 @@ pipeline {
                 stage('Unit Tests') {
                     agent { label 'unit-tests' }
                     when {
-                        branch feature_fix_racecond
+                        branch 'feature_fix_racecond'
                     }
                     steps {
                         echo "Executing on agent: ${env.NODE_NAME}"
@@ -60,7 +60,7 @@ pipeline {
                 stage('REST API Tests') {
                     agent { label 'rest-tests' }
                     when {
-                        branch feature_fix_racecond
+                        branch 'feature_fix_racecond'
                     }
                     steps {
                         echo "Executing on agent: ${env.NODE_NAME}"
